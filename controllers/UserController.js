@@ -26,13 +26,14 @@ const registerUser = asyncHandler(async (request, response) => {
 
   console.log(`User created ${user}`);
   if (user) {
-    response.status(201).json({ _id: user.id, email: user.email });
+    response.status(200).json({message:"Registered Successfully!",_id: user.id, email: user.email });
   } else {
     response.status(400);
-    throw new Error("User data us not valid");
+    throw new Error("User data is not valid");
   }
   response.json({ message: "Register the user" });
 });
+
 
 const loginUser = asyncHandler(async (request, response) => {
   const { email, password } = request.body;
@@ -40,7 +41,17 @@ const loginUser = asyncHandler(async (request, response) => {
     response.status(400);
     throw new Error("All fields are mandatory!");
   }
-  const user = await User.findOne({ email });
+
+  let user;
+  if (/^@/.test(email)) {
+    user = await User.findOne({ username: email });
+  } else if (email != /^@/.test(email) ) {
+    user = await User.findOne({ email });
+  } else {
+    response.status(401);
+    throw new Error("Invalid username or password");
+  }
+
   //compare password with hashedpassword
   if (user && (await bcrypt.compare(password, user.password))) {
     const accessToken = jwt.sign(
@@ -55,12 +66,13 @@ const loginUser = asyncHandler(async (request, response) => {
       process.env.ACCESS_TOKEN_SECERT,
       { expiresIn: "10080m" }
     );
-    response.status(200).json({ accessToken });
+    response.status(200).json({ accessToken, message: "Login Successfully!" });
   } else {
     response.status(401);
-    throw new Error("email or password is not valid");
+    throw new Error("Invalid email or password");
   }
 });
+
 
 const currentUser = asyncHandler(async (request, response) => {
   response.json(request.user);

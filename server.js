@@ -13,6 +13,7 @@ app.use(express.json());
 // app.use('/api/blog', require("../blog-backend/routes/BlogRouter"))
 app.use("/api/article", require("../blog-backend/routes/articleRouter.js"));
 app.use("/api/users", require("./routes/userRouter"));
+app.use("/api/topic", require("./routes/topicRouter"));
 
 app.use(errorHandler);
 app.listen(port, () => {
